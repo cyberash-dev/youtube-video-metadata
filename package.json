@@ -13,7 +13,8 @@
 		"test": "jest",
 		"test:coverage": "jest --coverage",
 		"format": "biome format --write",
-		"lint": "biome lint --write"
+		"lint": "biome lint --write",
+		"prepare": "husky"
 	},
 	"author": {
 		"email": "mail@cyberash.dev"
@@ -33,7 +34,9 @@
 		"@types/babel__traverse": "7.20.0",
 		"@types/jest": "30.0.0",
 		"@types/node": "20.0.0",
+		"husky": "9.1.7",
 		"jest": "30.0.5",
+		"lint-staged": "16.1.2",
 		"ts-jest": "29.4.0",
 		"ts-node": "10.9.0",
 		"typescript": "5.8.3"
@@ -46,5 +49,11 @@
 		"html",
 		"javascript",
 		"typescript"
-	]
+	],
+	"lint-staged": {
+		"*.{ts,js,json}": [
+			"biome format --write",
+			"biome lint --write"
+		]
+	}
 }
