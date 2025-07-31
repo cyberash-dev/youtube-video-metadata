@@ -14,12 +14,30 @@
 		"test:coverage": "jest --coverage",
 		"format": "biome format --write",
 		"lint": "biome lint --write",
-		"prepare": "husky"
+		"prepare": "husky",
+		"prepublishOnly": "npm run lint && npm run test && npm run build",
+		"preversion": "npm run lint && npm run test"
 	},
 	"author": {
 		"email": "mail@cyberash.dev"
 	},
 	"license": "ISC",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/cyberash-dev/youtube-video-metadata.git"
+	},
+	"homepage": "https://github.com/cyberash-dev/youtube-video-metadata#readme",
+	"bugs": {
+		"url": "https://github.com/cyberash-dev/youtube-video-metadata/issues"
+	},
+	"files": [
+		"dist/**/*",
+		"README.md"
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/"
+	},
 	"dependencies": {
 		"@babel/parser": "7.23.0",
 		"@babel/traverse": "7.23.0",
