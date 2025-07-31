@@ -52,8 +52,8 @@
 	],
 	"lint-staged": {
 		"*.{ts,js,json}": [
-			"biome format --write",
-			"biome lint --write"
+			"npm run lint",
+			"npm run format"
 		]
 	}
 }
