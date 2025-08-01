@@ -1,6 +1,6 @@
 {
 	"name": "youtube-video-metadata",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "A library for extracting YouTube video metadata from HTML pages by parsing the ytInitialPlayerResponse variable with CLI interface support",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
