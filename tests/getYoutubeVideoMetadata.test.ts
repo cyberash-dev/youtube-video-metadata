@@ -66,6 +66,7 @@ describe("getYoutubeVideoMetadata", () => {
 
 	test("should correctly handle audio-video format", () => {
 		const audioVideoFormat: YoutubeVideoFormat = {
+			itag: 22,
 			mimeType: 'video/mp4; codecs="avc1.640028, mp4a.40.2"',
 			contentLength: "12345678",
 			approxDurationMs: "213000",
@@ -100,6 +101,7 @@ describe("getYoutubeVideoMetadata", () => {
 			contentLength: "12345678",
 			mimeType: 'video/mp4; codecs="avc1.640028, mp4a.40.2"',
 			durationMs: 213000,
+			itag: 22,
 			width: 1920,
 			height: 1080,
 			fps: 30,
@@ -110,6 +112,7 @@ describe("getYoutubeVideoMetadata", () => {
 
 	test("should correctly handle video-only format", () => {
 		const videoOnlyFormat: YoutubeVideoFormat = {
+			itag: 137,
 			mimeType: 'video/mp4; codecs="avc1.640028"',
 			contentLength: "8765432",
 			approxDurationMs: "213000",
@@ -141,6 +144,7 @@ describe("getYoutubeVideoMetadata", () => {
 			contentLength: "8765432",
 			mimeType: 'video/mp4; codecs="avc1.640028"',
 			durationMs: 213000,
+			itag: 137,
 			width: 1280,
 			height: 720,
 			fps: 24,
@@ -151,6 +155,7 @@ describe("getYoutubeVideoMetadata", () => {
 
 	test("should correctly handle audio-only format", () => {
 		const audioOnlyFormat: YoutubeVideoFormat = {
+			itag: 140,
 			mimeType: 'audio/mp4; codecs="mp4a.40.2"',
 			contentLength: "3456789",
 			approxDurationMs: "213000",
@@ -181,6 +186,7 @@ describe("getYoutubeVideoMetadata", () => {
 			contentLength: "3456789",
 			mimeType: 'audio/mp4; codecs="mp4a.40.2"',
 			durationMs: 213000,
+			itag: 140,
 			sampleRate: 48000,
 			channelsCount: 2,
 		});
@@ -191,6 +197,7 @@ describe("getYoutubeVideoMetadata", () => {
 
 	test("should handle mixed formats from formats and adaptiveFormats", () => {
 		const audioVideoFormat: YoutubeVideoFormat = {
+			itag: 22,
 			mimeType: "video/mp4",
 			contentLength: "12345678",
 			width: 1920,
@@ -204,6 +211,7 @@ describe("getYoutubeVideoMetadata", () => {
 		};
 
 		const audioOnlyFormat: YoutubeVideoFormat = {
+			itag: 171,
 			mimeType: "audio/webm",
 			contentLength: "2345678",
 			audioQuality: "AUDIO_QUALITY_HIGH",
@@ -232,6 +240,7 @@ describe("getYoutubeVideoMetadata", () => {
 
 	test("should use default values for missing audio parameters", () => {
 		const audioOnlyFormat: YoutubeVideoFormat = {
+			itag: 140,
 			mimeType: "audio/mp4",
 			contentLength: "1234567",
 			audioQuality: "AUDIO_QUALITY_MEDIUM",
@@ -256,6 +265,7 @@ describe("getYoutubeVideoMetadata", () => {
 
 		const stream = result?.streams[0];
 		expect(stream).toMatchObject({
+			itag: 140,
 			sampleRate: 44100,
 			channelsCount: 2,
 			durationMs: 0,
@@ -264,12 +274,14 @@ describe("getYoutubeVideoMetadata", () => {
 
 	test("should skip formats that don't match any type", () => {
 		const invalidFormat = {
+			itag: 999,
 			mimeType: "application/unknown",
 			contentLength: "1234567",
 			bitrate: 128000,
 		} as YoutubeVideoFormat;
 
 		const validFormat: YoutubeVideoFormat = {
+			itag: 140,
 			mimeType: "audio/mp4",
 			contentLength: "2345678",
 			audioQuality: "AUDIO_QUALITY_MEDIUM",
@@ -344,6 +356,7 @@ describe("getYoutubeVideoMetadata", () => {
 
 	test("should correctly parse approxDurationMs to durationMs", () => {
 		const audioFormat: YoutubeVideoFormat = {
+			itag: 140,
 			mimeType: "audio/mp4",
 			contentLength: "1234567",
 			approxDurationMs: "180500",
@@ -366,5 +379,101 @@ describe("getYoutubeVideoMetadata", () => {
 
 		expect(result).toBeTruthy();
 		expect(result?.streams[0].durationMs).toBe(180500);
+	});
+
+	test("should set baseStreamUrl when format has url field", () => {
+		const audioFormatWithUrl: YoutubeVideoFormat = {
+			itag: 140,
+			mimeType: "audio/mp4",
+			contentLength: "1234567",
+			audioQuality: "AUDIO_QUALITY_MEDIUM",
+			bitrate: 128000,
+			url: "https://example.com/stream.mp4",
+		};
+
+		const ytResponse: YtInitialPlayerResponse = {
+			videoDetails: {
+				videoId: "test123",
+				lengthSeconds: "180",
+				channelId: "testChannel",
+			},
+			streamingData: {
+				adaptiveFormats: [audioFormatWithUrl],
+			},
+		};
+
+		const result = getYoutubeVideoMetadata(ytResponse);
+
+		expect(result).toBeTruthy();
+		expect(result?.baseStreamUrl).toBe("https://example.com/stream.mp4");
+	});
+
+	test("should set baseStreamUrl to undefined when no format has url field", () => {
+		const audioFormat: YoutubeVideoFormat = {
+			itag: 140,
+			mimeType: "audio/mp4",
+			contentLength: "1234567",
+			audioQuality: "AUDIO_QUALITY_MEDIUM",
+			bitrate: 128000,
+		};
+
+		const ytResponse: YtInitialPlayerResponse = {
+			videoDetails: {
+				videoId: "test123",
+				lengthSeconds: "180",
+				channelId: "testChannel",
+			},
+			streamingData: {
+				adaptiveFormats: [audioFormat],
+			},
+		};
+
+		const result = getYoutubeVideoMetadata(ytResponse);
+
+		expect(result).toBeTruthy();
+		expect(result?.baseStreamUrl).toBeUndefined();
+	});
+
+	test("should use first format's url when multiple formats have url field", () => {
+		const firstFormat: YoutubeVideoFormat = {
+			itag: 140,
+			mimeType: "audio/mp4",
+			contentLength: "1234567",
+			audioQuality: "AUDIO_QUALITY_MEDIUM",
+			bitrate: 128000,
+			url: "https://example.com/first-stream.mp4",
+		};
+
+		const secondFormat: YoutubeVideoFormat = {
+			itag: 22,
+			mimeType: "video/mp4",
+			contentLength: "12345678",
+			width: 1920,
+			height: 1080,
+			fps: 30,
+			audioQuality: "AUDIO_QUALITY_MEDIUM",
+			audioSampleRate: "44100",
+			audioChannels: 2,
+			bitrate: 2000000,
+			qualityLabel: "1080p",
+			url: "https://example.com/second-stream.mp4",
+		};
+
+		const ytResponse: YtInitialPlayerResponse = {
+			videoDetails: {
+				videoId: "test123",
+				lengthSeconds: "180",
+				channelId: "testChannel",
+			},
+			streamingData: {
+				formats: [firstFormat],
+				adaptiveFormats: [secondFormat],
+			},
+		};
+
+		const result = getYoutubeVideoMetadata(ytResponse);
+
+		expect(result).toBeTruthy();
+		expect(result?.baseStreamUrl).toBe("https://example.com/first-stream.mp4");
 	});
 });

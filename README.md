@@ -62,6 +62,7 @@ type YoutubeVideoMetadata = {
 	channelId: string;
 	streams: Stream[];
 	viewCount?: number;
+	baseStreamUrl?: string;
 };
 ```
 
@@ -87,6 +88,7 @@ type CommonStream = {
 	contentLength: string;
 	mimeType: string;
 	durationMs: number;
+	itag: number;
 };
 ```
 

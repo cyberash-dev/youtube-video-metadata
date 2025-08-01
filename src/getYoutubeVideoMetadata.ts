@@ -11,12 +11,15 @@ export function getYoutubeVideoMetadata(ytInitialPlayerResponse: YtInitialPlayer
 
 	const allFormats = [...(streamingData?.formats || []), ...(streamingData?.adaptiveFormats || [])];
 
+	const baseStreamUrl = allFormats.find((format) => format.url !== undefined)?.url;
+
 	const streams: Stream[] = allFormats
 		.map((format) => {
 			const baseStream = {
 				contentLength: format.contentLength,
 				mimeType: format.mimeType,
 				durationMs: format.approxDurationMs ? parseInt(format.approxDurationMs, 10) : 0,
+				itag: format.itag,
 			};
 
 			if (isAudioVideoFormat(format)) {
@@ -58,5 +61,6 @@ export function getYoutubeVideoMetadata(ytInitialPlayerResponse: YtInitialPlayer
 		channelId: videoDetails.channelId,
 		streams,
 		viewCount: videoDetails.viewCount ? parseInt(videoDetails.viewCount, 10) : undefined,
+		baseStreamUrl,
 	};
 }

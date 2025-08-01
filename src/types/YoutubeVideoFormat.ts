@@ -1,5 +1,5 @@
 export type BaseYoutubeVideoFormat = {
-	itag?: number;
+	itag: number;
 	url?: string;
 	mimeType: string;
 	bitrate: number;

@@ -2,6 +2,7 @@ export type CommonStream = {
 	contentLength: string;
 	mimeType: string;
 	durationMs: number;
+	itag: number;
 };
 
 export type AudioStream = CommonStream & {
@@ -28,6 +29,7 @@ export type YoutubeVideoMetadata = {
 	channelId: string;
 	streams: Stream[];
 	viewCount?: number;
+	baseStreamUrl?: string;
 };
 
 export function isAudioStream(stream: Stream): stream is AudioStream {
