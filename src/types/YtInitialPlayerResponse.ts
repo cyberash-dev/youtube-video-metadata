@@ -69,6 +69,7 @@ export type StreamingData = {
 	hlsManifestUrl?: string;
 	dashManifestUrl?: string;
 	licenseInfos?: LicenseInfo[];
+	serverAbrStreamingUrl?: string;
 };
 
 export type LicenseInfo = {

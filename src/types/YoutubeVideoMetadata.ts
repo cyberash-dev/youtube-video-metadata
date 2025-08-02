@@ -30,6 +30,7 @@ export type YoutubeVideoMetadata = {
 	streams: Stream[];
 	viewCount?: number;
 	baseStreamUrl?: string;
+	serverAbrStreamingUrl?: string;
 	videoPlaybackConfigBase64?: string;
 };
 

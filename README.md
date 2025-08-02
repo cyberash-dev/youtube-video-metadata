@@ -22,6 +22,7 @@ async function getVideoInfo() {
         console.log('Duration:', metadata.lengthSeconds, 'seconds');
         console.log('Views:', metadata.viewCount);
         console.log('Base stream URL:', metadata.baseStreamUrl);
+        console.log('Server ABR streaming URL:', metadata.serverAbrStreamingUrl);
         console.log('Has video config:', metadata.videoPlaybackConfigBase64 ? 'Yes' : 'No');
 
         // Available streams
@@ -65,9 +66,23 @@ type YoutubeVideoMetadata = {
 	streams: Stream[];
 	viewCount?: number;
 	baseStreamUrl?: string;
+	serverAbrStreamingUrl?: string;
 	videoPlaybackConfigBase64?: string;
 };
 ```
+
+**Field descriptions:**
+- `videoId` - YouTube video identifier
+- `channelName` - Name of the channel that uploaded the video
+- `title` - Video title
+- `description` - Video description
+- `lengthSeconds` - Video duration in seconds
+- `channelId` - YouTube channel identifier
+- `streams` - Array of available video/audio streams
+- `viewCount` - Number of views (optional)
+- `baseStreamUrl` - Base URL for accessing media streams (optional)
+- `serverAbrStreamingUrl` - Server-side adaptive bitrate streaming URL (optional)
+- `videoPlaybackConfigBase64` - Base64 encoded video playback configuration (optional)
 
 ### Stream Types
 
@@ -111,7 +126,9 @@ function isAudioVideoStream(stream: Stream): stream is AudioVideoStream
 - ✅ Comprehensive stream information (audio, video, combined)
 - ✅ Structured metadata extraction from YouTube
 - ✅ Base stream URL extraction for direct media access
+- ✅ Server ABR streaming URL extraction for adaptive bitrate streaming
 - ✅ Video playback configuration extraction (Base64 encoded)
+- ✅ Stream type guards for runtime type checking
 
 
 ## CLI Usage

@@ -62,6 +62,7 @@ export function getYoutubeVideoMetadata(ytInitialPlayerResponse: YtInitialPlayer
 		streams,
 		viewCount: videoDetails.viewCount ? parseInt(videoDetails.viewCount, 10) : undefined,
 		baseStreamUrl,
+		serverAbrStreamingUrl: streamingData?.serverAbrStreamingUrl,
 		videoPlaybackConfigBase64:
 			ytInitialPlayerResponse.playerConfig?.mediaCommonConfig?.mediaUstreamerRequestConfig
 				?.videoPlaybackUstreamerConfig,

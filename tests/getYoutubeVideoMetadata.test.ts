@@ -1,6 +1,7 @@
 import { getYoutubeVideoMetadata } from "../src/getYoutubeVideoMetadata";
 import type { YoutubeVideoFormat } from "../src/types/YoutubeVideoFormat";
 import type { YtInitialPlayerResponse } from "../src/types/YtInitialPlayerResponse";
+import { isAudioStream, isVideoStream, isAudioVideoStream } from "../src/types/YoutubeVideoMetadata";
 
 describe("getYoutubeVideoMetadata", () => {
 	test("should return null when videoDetails is missing", () => {
@@ -548,5 +549,215 @@ describe("getYoutubeVideoMetadata", () => {
 
 		expect(result).toBeTruthy();
 		expect(result?.videoPlaybackConfigBase64).toBeUndefined();
+	});
+
+	test("should extract serverAbrStreamingUrl when present in streamingData", () => {
+		const ytResponse: YtInitialPlayerResponse = {
+			videoDetails: {
+				videoId: "test123",
+				lengthSeconds: "213",
+				channelId: "testChannel",
+			},
+			streamingData: {
+				serverAbrStreamingUrl: "https://example.com/abr/streaming/url",
+			},
+		};
+
+		const result = getYoutubeVideoMetadata(ytResponse);
+
+		expect(result).toBeTruthy();
+		expect(result?.serverAbrStreamingUrl).toBe("https://example.com/abr/streaming/url");
+	});
+
+	test("should set serverAbrStreamingUrl to undefined when not present in streamingData", () => {
+		const ytResponse: YtInitialPlayerResponse = {
+			videoDetails: {
+				videoId: "test123",
+				lengthSeconds: "213",
+				channelId: "testChannel",
+			},
+			streamingData: {},
+		};
+
+		const result = getYoutubeVideoMetadata(ytResponse);
+
+		expect(result).toBeTruthy();
+		expect(result?.serverAbrStreamingUrl).toBeUndefined();
+	});
+
+	describe("Stream type guards", () => {
+		test("isAudioStream should correctly identify audio-only streams", () => {
+			const audioOnlyFormat: YoutubeVideoFormat = {
+				itag: 140,
+				mimeType: "audio/mp4",
+				contentLength: "1234567",
+				audioQuality: "AUDIO_QUALITY_MEDIUM",
+				audioSampleRate: "44100",
+				audioChannels: 2,
+				bitrate: 128000,
+			};
+
+			const ytResponse: YtInitialPlayerResponse = {
+				videoDetails: {
+					videoId: "test123",
+					lengthSeconds: "213",
+					channelId: "testChannel",
+				},
+				streamingData: {
+					adaptiveFormats: [audioOnlyFormat],
+				},
+			};
+
+			const result = getYoutubeVideoMetadata(ytResponse);
+			expect(result).toBeTruthy();
+			expect(result?.streams).toHaveLength(1);
+
+			if (result) {
+				const stream = result.streams[0];
+				expect(isAudioStream(stream)).toBe(true);
+				expect(isVideoStream(stream)).toBe(false);
+				expect(isAudioVideoStream(stream)).toBe(false);
+			}
+		});
+
+		test("isVideoStream should correctly identify video-only streams", () => {
+			const videoOnlyFormat: YoutubeVideoFormat = {
+				itag: 137,
+				mimeType: "video/mp4",
+				contentLength: "8765432",
+				width: 1280,
+				height: 720,
+				fps: 24,
+				qualityLabel: "720p",
+				bitrate: 1500000,
+			};
+
+			const ytResponse: YtInitialPlayerResponse = {
+				videoDetails: {
+					videoId: "test123",
+					lengthSeconds: "213",
+					channelId: "testChannel",
+				},
+				streamingData: {
+					adaptiveFormats: [videoOnlyFormat],
+				},
+			};
+
+			const result = getYoutubeVideoMetadata(ytResponse);
+			expect(result).toBeTruthy();
+			expect(result?.streams).toHaveLength(1);
+
+			if (result) {
+				const stream = result.streams[0];
+				expect(isAudioStream(stream)).toBe(false);
+				expect(isVideoStream(stream)).toBe(true);
+				expect(isAudioVideoStream(stream)).toBe(false);
+			}
+		});
+
+		test("isAudioVideoStream should correctly identify combined audio-video streams", () => {
+			const audioVideoFormat: YoutubeVideoFormat = {
+				itag: 22,
+				mimeType: "video/mp4",
+				contentLength: "12345678",
+				width: 1920,
+				height: 1080,
+				fps: 30,
+				audioQuality: "AUDIO_QUALITY_MEDIUM",
+				audioSampleRate: "44100",
+				audioChannels: 2,
+				qualityLabel: "1080p",
+				bitrate: 2000000,
+			};
+
+			const ytResponse: YtInitialPlayerResponse = {
+				videoDetails: {
+					videoId: "test123",
+					lengthSeconds: "213",
+					channelId: "testChannel",
+				},
+				streamingData: {
+					formats: [audioVideoFormat],
+				},
+			};
+
+			const result = getYoutubeVideoMetadata(ytResponse);
+			expect(result).toBeTruthy();
+			expect(result?.streams).toHaveLength(1);
+
+			if (result) {
+				const stream = result.streams[0];
+				expect(isAudioStream(stream)).toBe(true);
+				expect(isVideoStream(stream)).toBe(true);
+				expect(isAudioVideoStream(stream)).toBe(true);
+			}
+		});
+
+		test("type guards should work with real stream data from result", () => {
+			const formats: YoutubeVideoFormat[] = [
+				{
+					itag: 22,
+					mimeType: "video/mp4",
+					contentLength: "12345678",
+					width: 1920,
+					height: 1080,
+					fps: 30,
+					audioQuality: "AUDIO_QUALITY_MEDIUM",
+					audioSampleRate: "44100",
+					audioChannels: 2,
+					qualityLabel: "1080p",
+					bitrate: 2000000,
+				},
+				{
+					itag: 137,
+					mimeType: "video/mp4",
+					contentLength: "8765432",
+					width: 1280,
+					height: 720,
+					fps: 24,
+					qualityLabel: "720p",
+					bitrate: 1500000,
+				},
+				{
+					itag: 140,
+					mimeType: "audio/mp4",
+					contentLength: "1234567",
+					audioQuality: "AUDIO_QUALITY_MEDIUM",
+					audioSampleRate: "48000",
+					audioChannels: 2,
+					bitrate: 128000,
+				},
+			];
+
+			const ytResponse: YtInitialPlayerResponse = {
+				videoDetails: {
+					videoId: "test123",
+					lengthSeconds: "213",
+					channelId: "testChannel",
+				},
+				streamingData: {
+					adaptiveFormats: formats,
+				},
+			};
+
+			const result = getYoutubeVideoMetadata(ytResponse);
+			expect(result).toBeTruthy();
+
+			if (result) {
+				expect(result.streams).toHaveLength(3);
+
+				const audioVideoStreams = result.streams.filter(isAudioVideoStream);
+				const videoOnlyStreams = result.streams.filter(
+					(stream) => isVideoStream(stream) && !isAudioVideoStream(stream),
+				);
+				const audioOnlyStreams = result.streams.filter(
+					(stream) => isAudioStream(stream) && !isAudioVideoStream(stream),
+				);
+
+				expect(audioVideoStreams).toHaveLength(1);
+				expect(videoOnlyStreams).toHaveLength(1);
+				expect(audioOnlyStreams).toHaveLength(1);
+			}
+		});
 	});
 });
