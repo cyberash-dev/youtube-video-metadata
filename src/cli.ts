@@ -144,7 +144,7 @@ function displayVideoInfo(metadata: YoutubeVideoMetadata, options: DisplayVideoI
 	}
 }
 
-program.name("youtube-video-metadata").description("CLI for getting YouTube video metadata").version("0.1.0");
+program.name("youtube-video-metadata").description("CLI for getting YouTube video metadata").version("0.2.0");
 
 program
 	.command("get")

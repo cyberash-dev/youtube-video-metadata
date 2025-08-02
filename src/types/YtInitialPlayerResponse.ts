@@ -3,12 +3,21 @@ import type { YoutubeVideoFormat } from "./YoutubeVideoFormat";
 export type YtInitialPlayerResponse = {
 	responseContext?: ResponseContext;
 	videoDetails?: VideoDetails;
+	playerConfig?: PlayerConfig;
 	streamingData?: StreamingData;
 	playabilityStatus?: PlayabilityStatus;
 	endscreen?: Endscreen;
 	adPlacements?: AdPlacement[];
 	adBreakHeartbeatParams?: string;
 	frameworkUpdates?: FrameworkUpdates;
+};
+
+export type PlayerConfig = {
+	mediaCommonConfig?: {
+		mediaUstreamerRequestConfig?: {
+			videoPlaybackUstreamerConfig?: string;
+		};
+	};
 };
 
 export type ResponseContext = {

@@ -30,6 +30,7 @@ export type YoutubeVideoMetadata = {
 	streams: Stream[];
 	viewCount?: number;
 	baseStreamUrl?: string;
+	videoPlaybackConfigBase64?: string;
 };
 
 export function isAudioStream(stream: Stream): stream is AudioStream {

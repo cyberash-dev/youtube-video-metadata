@@ -476,4 +476,77 @@ describe("getYoutubeVideoMetadata", () => {
 		expect(result).toBeTruthy();
 		expect(result?.baseStreamUrl).toBe("https://example.com/first-stream.mp4");
 	});
+
+	test("should extract videoPlaybackConfigBase64 when playerConfig is present", () => {
+		const ytResponse: YtInitialPlayerResponse = {
+			videoDetails: {
+				videoId: "test123",
+				lengthSeconds: "213",
+				channelId: "testChannel",
+			},
+			playerConfig: {
+				mediaCommonConfig: {
+					mediaUstreamerRequestConfig: {
+						videoPlaybackUstreamerConfig: "base64ConfigString123",
+					},
+				},
+			},
+		};
+
+		const result = getYoutubeVideoMetadata(ytResponse);
+
+		expect(result).toBeTruthy();
+		expect(result?.videoPlaybackConfigBase64).toBe("base64ConfigString123");
+	});
+
+	test("should set videoPlaybackConfigBase64 to undefined when playerConfig is missing", () => {
+		const ytResponse: YtInitialPlayerResponse = {
+			videoDetails: {
+				videoId: "test123",
+				lengthSeconds: "213",
+				channelId: "testChannel",
+			},
+		};
+
+		const result = getYoutubeVideoMetadata(ytResponse);
+
+		expect(result).toBeTruthy();
+		expect(result?.videoPlaybackConfigBase64).toBeUndefined();
+	});
+
+	test("should set videoPlaybackConfigBase64 to undefined when mediaCommonConfig is missing", () => {
+		const ytResponse: YtInitialPlayerResponse = {
+			videoDetails: {
+				videoId: "test123",
+				lengthSeconds: "213",
+				channelId: "testChannel",
+			},
+			playerConfig: {},
+		};
+
+		const result = getYoutubeVideoMetadata(ytResponse);
+
+		expect(result).toBeTruthy();
+		expect(result?.videoPlaybackConfigBase64).toBeUndefined();
+	});
+
+	test("should set videoPlaybackConfigBase64 to undefined when videoPlaybackUstreamerConfig is missing", () => {
+		const ytResponse: YtInitialPlayerResponse = {
+			videoDetails: {
+				videoId: "test123",
+				lengthSeconds: "213",
+				channelId: "testChannel",
+			},
+			playerConfig: {
+				mediaCommonConfig: {
+					mediaUstreamerRequestConfig: {},
+				},
+			},
+		};
+
+		const result = getYoutubeVideoMetadata(ytResponse);
+
+		expect(result).toBeTruthy();
+		expect(result?.videoPlaybackConfigBase64).toBeUndefined();
+	});
 });

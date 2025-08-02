@@ -21,6 +21,8 @@ async function getVideoInfo() {
         console.log('Channel:', metadata.channelName);
         console.log('Duration:', metadata.lengthSeconds, 'seconds');
         console.log('Views:', metadata.viewCount);
+        console.log('Base stream URL:', metadata.baseStreamUrl);
+        console.log('Has video config:', metadata.videoPlaybackConfigBase64 ? 'Yes' : 'No');
 
         // Available streams
         metadata.streams.forEach(stream => {
@@ -63,6 +65,7 @@ type YoutubeVideoMetadata = {
 	streams: Stream[];
 	viewCount?: number;
 	baseStreamUrl?: string;
+	videoPlaybackConfigBase64?: string;
 };
 ```
 
@@ -107,6 +110,8 @@ function isAudioVideoStream(stream: Stream): stream is AudioVideoStream
 - ✅ Full TypeScript support with complete type definitions
 - ✅ Comprehensive stream information (audio, video, combined)
 - ✅ Structured metadata extraction from YouTube
+- ✅ Base stream URL extraction for direct media access
+- ✅ Video playback configuration extraction (Base64 encoded)
 
 
 ## CLI Usage
